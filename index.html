@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Crayon Box English</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600&family=Noto+Nastaliq+Urdu:wght@500&display=swap">
+<style>
+/* Layout: one reading column of six numbered games, each with its own crayon colour.
+   Anything the child colours or reads a picture from sits on a white "paper sheet". */
+:root{
+  --bg:#F2F5FB; --surface:#FFFFFF; --ink:#1B2340; --muted:#566182; --line:#D3DAEA;
+  --sheet:#FFFFFF; --sheet-ink:#1B2340; --sheet-line:#C9D1E3;
+  --a1:#D8343A; --a2:#C96A00; --a3:#1F8A4C; --a4:#2360C9; --a5:#7A44C4; --a6:#C93A82;
+  --on-accent:#FFFFFF;
+  --good:#1B7F45; --bad:#BF342C; --star:#EFB100;
+  --display:"Fredoka","Trebuchet MS","Segoe UI",sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",sans-serif;
+  --urdu:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting","Noto Naskh Arabic",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131A2E; --surface:#1D2642; --ink:#EEF1FA; --muted:#A9B3D1; --line:#35406A;
+    --sheet:#F4F6FB; --sheet-ink:#1B2340; --sheet-line:#C9D1E3;
+    --a1:#FF8080; --a2:#FFB05C; --a3:#6FD88F; --a4:#86B6FF; --a5:#BDA0F7; --a6:#FF92C4;
+    --on-accent:#131A2E; --good:#6FD88F; --bad:#FF9288; --star:#FFD24A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131A2E; --surface:#1D2642; --ink:#EEF1FA; --muted:#A9B3D1; --line:#35406A;
+  --sheet:#F4F6FB; --sheet-ink:#1B2340; --sheet-line:#C9D1E3;
+  --a1:#FF8080; --a2:#FFB05C; --a3:#6FD88F; --a4:#86B6FF; --a5:#BDA0F7; --a6:#FF92C4;
+  --on-accent:#131A2E; --good:#6FD88F; --bad:#FF9288; --star:#FFD24A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--a4);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:2px solid var(--line)}
+.top-in{max-width:760px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.brand{font-family:var(--display);font-weight:600;font-size:18px;margin-right:auto}
+.stars{display:flex;gap:2px}
+.stars svg{width:24px;height:24px;fill:var(--line);transition:fill .3s,transform .3s}
+.stars svg.on{fill:var(--star);transform:scale(1.12)}
+.tog{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:700;min-height:38px}
+.tog[aria-pressed="true"]{border-color:var(--a4);color:var(--a4)}
+.tog .u{font-family:var(--urdu);font-weight:500}
+
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:24px 48px;display:flex;flex-direction:column;gap:36px}
+
+/* intro */
+.intro{display:flex;flex-direction:column;gap:12px}
+.intro h1{font-size:clamp(34px,8vw,52px);letter-spacing:-.01em}
+.intro h1 span{display:inline-block}
+.grade{font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.intro p{max-width:56ch;font-size:19px}
+.plan{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.plan a{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px 6px 6px;font-weight:700;font-size:15px}
+.plan b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--a);color:var(--on-accent);font-family:var(--display);font-size:15px}
+
+/* games */
+.g1{--a:var(--a1)}.g2{--a:var(--a2)}.g3{--a:var(--a3)}.g4{--a:var(--a4)}.g5{--a:var(--a5)}.g6{--a:var(--a6)}
+.game{display:flex;flex-direction:column;gap:14px;scroll-margin-top:70px}
+.ghead{display:flex;align-items:center;gap:12px}
+.num{flex:none;width:46px;height:46px;border-radius:50%;background:var(--a);color:var(--on-accent);font-family:var(--display);font-weight:600;font-size:26px;display:grid;place-items:center}
+.ghead h2{font-size:clamp(24px,5.5vw,30px)}
+.learn{font-size:18px;max-width:60ch}
+.learn b{color:var(--a)}
+.do{font-weight:700}
+.ur{font-family:var(--urdu);font-size:17px;line-height:2.3;color:var(--muted);text-align:right}
+.sheet{background:var(--sheet);color:var(--sheet-ink);border:2px solid var(--sheet-line);border-radius:14px;padding:14px}
+.say{min-height:1.5em;font-weight:700}
+.say.ok{color:var(--good)}.say.no{color:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{background:var(--a);color:var(--on-accent);border:0;border-radius:12px;padding:10px 20px;font-weight:700;min-height:46px}
+.opt{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:10px 16px;font-weight:700;min-height:48px;text-align:left}
+.opt:hover:not(:disabled){border-color:var(--a)}
+.opt.right{border-color:var(--good);color:var(--good)}
+.opt:disabled{cursor:default}
+.count{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+
+/* game 1: colouring */
+.swatches{display:flex;gap:16px;flex-wrap:wrap}
+.pair{display:flex;align-items:center;gap:8px;font-weight:700}
+.pair i{width:28px;height:28px;border-radius:50%;border:2px solid var(--sheet-line)}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cell{background:none;border:2px solid transparent;border-radius:12px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--sheet-ink);font-size:13px;font-weight:700;line-height:1.2;text-align:center;position:relative}
+.cell svg{width:100%;max-width:70px;height:auto}
+.cell.done::after{content:"✓";position:absolute;top:0;right:4px;color:#1B7F45;font-size:18px}
+.palette{margin-top:12px;padding-top:12px;border-top:2px dashed var(--sheet-line)}
+.cray{background:none;border:0;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--sheet-ink);font-size:12px;font-weight:700;line-height:1.15;text-align:center}
+.cray i{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--sheet-line)}
+.cray[aria-pressed="true"] i{box-shadow:0 0 0 4px var(--sheet-ink);transform:scale(1.08)}
+
+/* game 2: counting */
+.tally{display:flex;flex-direction:column;gap:10px}
+.trow{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:8px 12px}
+.trow svg{width:38px;height:38px;flex:none}
+.trow span{font-weight:700;margin-right:auto}
+.trow.ok{border-color:var(--good)}.trow.no{border-color:var(--bad)}
+.step{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--bg);font-size:24px;font-weight:700;line-height:1}
+.trow output{min-width:1.6em;text-align:center;font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+
+/* game 3: positions */
+.words3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.w3{display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;font-size:15px}
+.w3 svg{width:54px;height:54px}
+.map .mc{display:grid;place-items:center;border-radius:12px;padding:4px;border:3px solid transparent}
+.map .mc svg{width:100%;max-width:58px;height:auto}
+.map .mc.hi{border-color:var(--sheet-ink);background:#FFF2B8}
+.qcard{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.q{font-family:var(--display);font-size:22px;font-weight:500}
+.blank{display:inline-block;min-width:4.5em;border-bottom:3px solid var(--a);text-align:center;color:var(--a);font-weight:700}
+
+/* game 4: nouns and verbs */
+.bigword{font-family:var(--display);font-size:clamp(34px,9vw,46px);font-weight:600;text-align:center;padding:10px;background:var(--surface);border:2px dashed var(--a);border-radius:14px}
+.bins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.bin{background:var(--surface);border:2px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:left;min-height:120px}
+.bin:hover{border-color:var(--a)}
+.bin strong{font-family:var(--display);font-size:19px;font-weight:600}
+.bin small{color:var(--muted);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:2px 10px;font-size:15px;font-weight:700}
+.two{display:flex;flex-direction:column;gap:14px;border-top:2px dashed var(--line);padding-top:14px}
+.two h3{font-size:20px}
+.tq{display:flex;flex-direction:column;gap:8px}
+
+/* game 5: opposites */
+.match{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px}
+.m{background:var(--surface);border:2px solid var(--line);border-radius:12px;min-height:50px;font-weight:700;font-size:19px;padding:6px}
+.m[aria-pressed="true"]{border-color:var(--a);box-shadow:0 0 0 3px var(--a) inset}
+.m.p0{--k:var(--a1)}.m.p1{--k:var(--a2)}.m.p2{--k:var(--a3)}.m.p3{--k:var(--a4)}.m.p4{--k:var(--a5)}.m.p5{--k:var(--a6)}
+.m.paired{border-color:var(--k);color:var(--k);background:color-mix(in srgb,var(--k) 12%,var(--surface))}
+
+/* game 6: questions with or */
+.pic svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto}
+.line{min-height:52px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:3px solid var(--line);padding-bottom:8px;font-family:var(--display);font-size:22px}
+.line .ph{color:var(--muted);font-family:var(--body);font-size:16px}
+.wordbtn{background:var(--surface);border:2px solid var(--a);border-radius:10px;padding:8px 14px;font-weight:700;font-size:19px;min-height:46px}
+.wordbtn.used{visibility:hidden}
+
+/* finish + footer */
+.finish{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.finish h2{font-size:28px}
+.finish .stars svg{width:40px;height:40px}
+.finish .btn{--a:var(--a4)}
+.about{border-top:2px solid var(--line);padding-top:18px;color:var(--muted);font-size:15px;display:flex;flex-direction:column;gap:8px;max-width:68ch}
+.about strong{color:var(--ink)}
+
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.pop{animation:pop .35s}
+@keyframes pop{50%{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.shake,.pop{animation:none}.stars svg{transition:none}}
+@media (max-width:420px){.bins{grid-template-columns:1fr}.bin{min-height:0}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="brand">Crayon Box English</span>
+    <span class="stars" id="stars" role="img" aria-label="0 of 6 stars"></span>
+    <button class="tog" id="urduBtn" aria-pressed="false"><span class="u">اردو</span> help</button>
+    <button class="tog" id="soundBtn" aria-pressed="true">Sound on</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <span class="grade">Grade 2 · English practice</span>
+    <h1>Six little games. <span>Six gold stars.</span></h1>
+    <p>Colour the shapes, find where they are, sort the words and build questions. Finish a game to win its star.</p>
+    <ul class="plan">
+      <li><a class="g1" href="#g1"><b>1</b>Light and dark</a></li>
+      <li><a class="g2" href="#g2"><b>2</b>How many?</a></li>
+      <li><a class="g3" href="#g3"><b>3</b>Where is it?</a></li>
+      <li><a class="g4" href="#g4"><b>4</b>Naming or doing?</a></li>
+      <li><a class="g5" href="#g5"><b>5</b>Opposites</a></li>
+      <li><a class="g6" href="#g6"><b>6</b>This or that?</a></li>
+    </ul>
+  </section>
+
+  <!-- 1 -->
+  <section class="game g1" id="g1">
+    <div class="ghead"><span class="num">1</span><h2>Light and dark colours</h2></div>
+    <p class="learn">One colour can be <b>light</b> or <b>dark</b>. Light blue is soft like the morning sky. Dark blue is deep like the sea at night.</p>
+    <p class="do">Pick a crayon. Then tap the shape that needs that colour. Two are done for you.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>پہلے ایک رنگ چُنیں، پھر اُس شکل کو دبائیں جس میں یہ رنگ بھرنا ہے۔ دو شکلیں پہلے سے رنگی ہوئی ہیں۔</p>
+    <div class="sheet">
+      <div class="swatches">
+        <span class="pair"><i style="background:#8FD0F5"></i>light blue</span>
+        <span class="pair"><i style="background:#1F4FB5"></i>dark blue</span>
+        <span class="pair"><i style="background:#A6E38A"></i>light green</span>
+        <span class="pair"><i style="background:#1E7A3C"></i>dark green</span>
+      </div>
+      <div class="palette"><div class="grid4" id="paintGrid"></div></div>
+      <div class="palette"><div class="grid4" id="crayons"></div></div>
+    </div>
+    <p class="say" id="say1" aria-live="polite"></p>
+  </section>
+
+  <!-- 2 -->
+  <section class="game g2" id="g2">
+    <div class="ghead"><span class="num">2</span><h2>How many shapes?</h2></div>
+    <p class="learn">A <b>circle</b> is round. A <b>square</b> has four sides. A <b>triangle</b> has three sides.</p>
+    <p class="do">Look at the shapes in game 1. Count each kind. Tap + and − to set your number.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>پہلے کھیل کی شکلیں دیکھیں اور گنیں کہ ہر شکل کتنی بار آئی ہے۔ + اور − دبا کر اپنا جواب لکھیں۔</p>
+    <div class="tally" id="tally"></div>
+    <div class="row"><button class="btn" id="checkCount">Check my counting</button></div>
+    <div class="qcard" id="totalBox" hidden>
+      <p class="q">How many shapes are there altogether?</p>
+      <div class="row" id="totalOpts"></div>
+    </div>
+    <p class="say" id="say2" aria-live="polite"></p>
+  </section>
+
+  <!-- 3 -->
+  <section class="game g3" id="g3">
+    <div class="ghead"><span class="num">3</span><h2>Where is it?</h2></div>
+    <p class="learn">We use <b>above</b>, <b>below</b> and <b>next to</b> to say where something is.</p>
+    <div class="words3" id="words3"></div>
+    <p class="do">Look at the two shapes in the yellow boxes. Choose the right words.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>پیلے خانوں والی شکلیں دیکھیں اور صحیح لفظ چُنیں: above یعنی اوپر، below یعنی نیچے، next to یعنی ساتھ۔</p>
+    <div class="sheet"><div class="grid4 map" id="map"></div></div>
+    <div class="qcard">
+      <span class="count" id="q3count"></span>
+      <p class="q" id="q3"></p>
+      <p class="q" id="q3stem"></p>
+      <div class="row" id="q3opts"></div>
+    </div>
+    <p class="say" id="say3" aria-live="polite"></p>
+  </section>
+
+  <!-- 4 -->
+  <section class="game g4" id="g4">
+    <div class="ghead"><span class="num">4</span><h2>Naming word or doing word?</h2></div>
+    <p class="learn">A <b>noun</b> is a naming word. It names a person, a place, an animal or a thing. A <b>verb</b> is a doing word. It tells us what someone does.</p>
+    <p class="do">Read the word. Tap the box where it belongs.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>لفظ پڑھیں۔ اگر یہ کسی چیز، جگہ یا شخص کا نام ہے تو noun والا ڈبہ دبائیں۔ اگر یہ کوئی کام ہے تو verb والا ڈبہ دبائیں۔</p>
+    <span class="count" id="q4count"></span>
+    <div class="bigword" id="bigword"></div>
+    <div class="bins">
+      <button class="bin" id="binN"><strong>Nouns</strong><small>naming words</small><span class="chips" id="chipsN"></span></button>
+      <button class="bin" id="binV"><strong>Verbs</strong><small>doing words</small><span class="chips" id="chipsV"></span></button>
+    </div>
+    <p class="say" id="say4" aria-live="polite"></p>
+    <div class="two">
+      <h3>One word, two jobs</h3>
+      <p class="learn">Some words can be a noun in one sentence and a verb in another.</p>
+      <div id="twoJobs" class="two" style="border:0;padding:0"></div>
+      <p class="say" id="say4b" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="game g5" id="g5">
+    <div class="ghead"><span class="num">5</span><h2>Opposites</h2></div>
+    <p class="learn">Opposites are words that mean very different things, like <b>up</b> and <b>down</b>.</p>
+    <p class="do">Tap a word on the left. Then tap its opposite on the right.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>بائیں طرف سے ایک لفظ دبائیں، پھر دائیں طرف سے اُس کا اُلٹ لفظ دبائیں۔</p>
+    <div class="match" id="match"></div>
+    <p class="say" id="say5" aria-live="polite"></p>
+  </section>
+
+  <!-- 6 -->
+  <section class="game g6" id="g6">
+    <div class="ghead"><span class="num">6</span><h2>This or that?</h2></div>
+    <p class="learn">We use <b>or</b> to ask about two choices. <em>Is the tea hot or cold?</em></p>
+    <p class="do">Tap the words in order to build the question. Then choose the true answer.</p>
+    <p class="ur" lang="ur" dir="rtl" hidden>الفاظ کو صحیح ترتیب میں دبا کر سوال بنائیں۔ پھر تصویر دیکھ کر صحیح جواب چُنیں۔</p>
+    <span class="count" id="q6count"></span>
+    <div class="sheet pic" id="pic"></div>
+    <div class="line" id="line"></div>
+    <div class="row" id="bank"></div>
+    <div class="row" id="answers"></div>
+    <p class="say" id="say6" aria-live="polite"></p>
+  </section>
+
+  <section class="finish" id="finish">
+    <span class="stars" id="stars2" aria-hidden="true"></span>
+    <h2 id="finTitle">0 of 6 stars</h2>
+    <p id="finText">Finish a game to win its star.</p>
+    <button class="btn" id="again">Start all games again</button>
+  </section>
+
+  <footer class="about">
+    <p><strong>About this demo.</strong> Built by AIBYTEC as a sample of how a printed Grade 2 English workbook unit can become an interactive lesson.</p>
+    <p>It covers light and dark colours, shapes and counting, the position words above, below and next to, nouns and verbs, opposites, and questions with “or”. Every word list, sentence and drawing here was written for this demo.</p>
+    <p>It runs in any browser on a phone, tablet or laptop, with no login. Instructions can be shown in Urdu with one tap.</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  /* ---------- small helpers ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  function h(tag, attrs, html){
+    const e = document.createElement(tag);
+    for (const k in (attrs || {})) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function shake(e){ e.classList.remove("shake"); void e.offsetWidth; e.classList.add("shake"); }
+  function say(id, msg, kind){ const e = $(id); e.textContent = msg; e.className = "say" + (kind ? " " + kind : ""); }
+
+  /* ---------- sound (starts only after a tap) ---------- */
+  let soundOn = true, ctx = null;
+  function tone(ok){
+    if (!soundOn) return;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime;
+      o.frequency.setValueAtTime(ok ? 660 : 200, t);
+      if (ok) o.frequency.setValueAtTime(880, t + 0.1);
+      g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.27);
+    } catch (e) {}
+  }
+  function right(id, msg){ say(id, msg, "ok"); tone(true); }
+  function wrong(id, msg, el){ say(id, msg, "no"); tone(false); if (el) shake(el); }
+
+  /* ---------- stars ---------- */
+  const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2l3 6.6 7 .8-5.2 4.8 1.5 7L12 17.6 5.700 21.200l1.500-7L2 9.400l7-.8z"/></svg>';
+  let stars = [];
+  function drawStars(){
+    const n = stars.filter(Boolean).length;
+    for (const id of ["#stars", "#stars2"]) {
+      const box = $(id); box.innerHTML = "";
+      for (let i = 0; i < 6; i++) { const s = h("span", null, STAR).firstChild; if (stars[i]) s.classList.add("on"); box.appendChild(s); }
+    }
+    $("#stars").setAttribute("aria-label", n + " of 6 stars");
+    $("#finTitle").textContent = n + " of 6 stars";
+    $("#finText").textContent = n === 6 ? "You finished every game. Well done!" : n === 0 ? "Finish a game to win its star." : "Good work. " + (6 - n) + " more to go.";
+  }
+  function award(i){ if (!stars[i]) { stars[i] = true; drawStars(); } }
+
+  /* ---------- shared shape data ---------- */
+  const COLORS = {
+    lblue:{name:"light blue",hex:"#8FD0F5"}, dblue:{name:"dark blue",hex:"#1F4FB5"},
+    lgreen:{name:"light green",hex:"#A6E38A"}, dgreen:{name:"dark green",hex:"#1E7A3C"},
+    red:{name:"red",hex:"#E23B3B"}, yellow:{name:"yellow",hex:"#FFD233"}, orange:{name:"orange",hex:"#F58A1F"},
+    purple:{name:"purple",hex:"#8A4FD0"}, pink:{name:"pink",hex:"#F58FBF"}, brown:{name:"brown",hex:"#8A5A32"},
+    grey:{name:"grey",hex:"#9AA0A8"}, black:{name:"black",hex:"#22252B"}
+  };
+  // 4 columns x 3 rows, read left to right
+  const GRID = [
+    ["circle","lblue"],["square","red"],["tri","yellow"],["circle","dgreen"],
+    ["square","orange"],["circle","purple"],["circle","dblue"],["tri","pink"],
+    ["tri","lgreen"],["square","brown"],["circle","grey"],["square","black"]
+  ];
+  const NAMES = {circle:"circle", square:"square", tri:"triangle"};
+  function shape(kind, fill){
+    const st = 'fill="' + (fill || "#FFFFFF") + '" stroke="#1B2340" stroke-width="3" stroke-linejoin="round"';
+    const body = kind === "circle" ? '<circle cx="32" cy="32" r="26" ' + st + '/>' :
+                 kind === "square" ? '<rect x="7" y="7" width="50" height="50" rx="4" ' + st + '/>' :
+                 '<polygon points="32,6 59,57 5,57" ' + st + '/>';
+    return '<svg viewBox="0 0 64 64" aria-hidden="true">' + body + '</svg>';
+  }
+
+  /* ---------- game 1: colouring ---------- */
+  let crayon, painted;
+  function init1(){
+    crayon = null; painted = new Set([0, 1]);
+    const grid = $("#paintGrid"), pal = $("#crayons");
+    grid.innerHTML = ""; pal.innerHTML = "";
+    GRID.forEach(([kind, c], i) => {
+      const b = h("button", {class:"cell", "aria-label": COLORS[c].name + " " + NAMES[kind]});
+      const draw = () => { b.innerHTML = shape(kind, painted.has(i) ? COLORS[c].hex : null) + "<span>" + COLORS[c].name + "</span>"; b.classList.toggle("done", painted.has(i)); };
+      draw();
+      b.addEventListener("click", () => {
+        if (painted.has(i)) return;
+        if (!crayon) return wrong("#say1", "Pick a crayon first.", b);
+        if (crayon !== c) return wrong("#say1", "You picked " + COLORS[crayon].name + ". This " + NAMES[kind] + " needs " + COLORS[c].name + ".", b);
+        painted.add(i); draw(); b.classList.add("pop");
+        if (painted.size === GRID.length) { right("#say1", "All 12 shapes are coloured. You win a star!"); award(0); }
+        else right("#say1", "Yes! A " + COLORS[c].name + " " + NAMES[kind] + ".");
+      });
+      grid.appendChild(b);
+    });
+    shuffle(Object.keys(COLORS)).forEach(c => {
+      const b = h("button", {class:"cray", "aria-pressed":"false"}, '<i style="background:' + COLORS[c].hex + '"></i>' + COLORS[c].name);
+      b.addEventListener("click", () => {
+        crayon = c;
+        pal.querySelectorAll(".cray").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+        say("#say1", "You have the " + COLORS[c].name + " crayon. Now tap a shape.");
+      });
+      pal.appendChild(b);
+    });
+    say("#say1", "");
+  }
+
+  /* ---------- game 2: counting ---------- */
+  function init2(){
+    const want = {circle:0, square:0, tri:0};
+    GRID.forEach(([k]) => want[k]++);
+    const got = {circle:0, square:0, tri:0}, rows = {};
+    const box = $("#tally"); box.innerHTML = "";
+    $("#totalBox").hidden = true; say("#say2", "");
+    ["circle", "square", "tri"].forEach(k => {
+      const row = h("div", {class:"trow"}, shape(k, "#FFD233") + "<span>" + NAMES[k] + "s</span>");
+      const minus = h("button", {class:"step", "aria-label":"one less"}, "−");
+      const out = h("output", null, "0");
+      const plus = h("button", {class:"step", "aria-label":"one more"}, "+");
+      const set = d => { got[k] = Math.max(0, Math.min(9, got[k] + d)); out.textContent = got[k]; row.classList.remove("ok", "no"); };
+      minus.addEventListener("click", () => set(-1)); plus.addEventListener("click", () => set(1));
+      row.append(minus, out, plus); box.appendChild(row); rows[k] = row;
+    });
+    $("#checkCount").onclick = () => {
+      let all = true;
+      for (const k in want) { const ok = got[k] === want[k]; rows[k].classList.toggle("ok", ok); rows[k].classList.toggle("no", !ok); if (!ok) all = false; }
+      if (!all) return wrong("#say2", "Not yet. Count the red boxes again, slowly.");
+      right("#say2", "Good counting! One more question.");
+      $("#totalBox").hidden = false;
+    };
+    const opts = $("#totalOpts"); opts.innerHTML = "";
+    [10, 11, 12, 13].forEach(n => {
+      const b = h("button", {class:"opt"}, String(n));
+      b.addEventListener("click", () => {
+        if (n !== GRID.length) return wrong("#say2", "Try again. Add your three numbers together.", b);
+        b.classList.add("right"); opts.querySelectorAll("button").forEach(x => x.disabled = true);
+        right("#say2", "Yes, 5 + 4 + 3 = 12 shapes. You win a star!"); award(1);
+      });
+      opts.appendChild(b);
+    });
+  }
+
+  /* ---------- game 3: positions ---------- */
+  const Q3 = [
+    {q:"Where is the red square?", stem:"the yellow triangle.", a:"next to", hi:[1, 2]},
+    {q:"Where is the purple circle?", stem:"the red square.", a:"below", hi:[5, 1]},
+    {q:"Where is the orange square?", stem:"the light green triangle.", a:"above", hi:[4, 8]},
+    {q:"Where is the grey circle?", stem:"the dark blue circle.", a:"below", hi:[10, 6]},
+    {q:"Which shape is above the pink triangle?", opts:["the yellow triangle", "the dark green circle", "the black square"], a:"the dark green circle", hi:[7]},
+    {q:"Which shape is next to the brown square?", opts:["the purple circle", "the orange square", "the grey circle"], a:"the grey circle", hi:[9]}
+  ];
+  function init3(){
+    // three tiny pictures that show each position word
+    const dot = (x, y, f) => '<circle cx="' + x + '" cy="' + y + '" r="11" fill="' + f + '" stroke="#1B2340" stroke-width="2.500"/>';
+    const mini = (a, b) => '<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="1" y="1" width="58" height="58" rx="10" fill="#FFFFFF" stroke="#C9D1E3" stroke-width="2"/>' + a + b + '</svg>';
+    $("#words3").innerHTML =
+      '<div class="w3">' + mini(dot(30, 17, "#E23B3B"), dot(30, 43, "#C9D1E3")) + 'red is above</div>' +
+      '<div class="w3">' + mini(dot(30, 17, "#C9D1E3"), dot(30, 43, "#E23B3B")) + 'red is below</div>' +
+      '<div class="w3">' + mini(dot(17, 30, "#E23B3B"), dot(43, 30, "#C9D1E3")) + 'red is next to</div>';
+    const map = $("#map"); map.innerHTML = "";
+    GRID.forEach(([k, c]) => map.appendChild(h("div", {class:"mc"}, shape(k, COLORS[c].hex))));
+    let n = 0;
+    function show(){
+      const q = Q3[n], opts = $("#q3opts");
+      [...map.children].forEach((m, i) => m.classList.toggle("hi", q.hi.includes(i)));
+      $("#q3count").textContent = "Question " + (n + 1) + " of " + Q3.length;
+      $("#q3").textContent = q.q;
+      $("#q3stem").innerHTML = q.stem ? 'It is <span class="blank">&nbsp;</span> ' + q.stem : "";
+      $("#q3stem").hidden = !q.stem;
+      opts.innerHTML = "";
+      (q.opts || ["above", "below", "next to"]).forEach(o => {
+        const b = h("button", {class:"opt"}, o);
+        b.addEventListener("click", () => {
+          if (o !== q.a) return wrong("#say3", "Look again at the yellow boxes.", b);
+          b.classList.add("right");
+          if (q.stem) $("#q3stem .blank").textContent = o;
+          opts.querySelectorAll("button").forEach(x => x.disabled = true);
+          n++;
+          if (n === Q3.length) { right("#say3", "You know your position words. You win a star!"); award(2); }
+          else { right("#say3", "Correct!"); setTimeout(show, 1100); }
+        });
+        opts.appendChild(b);
+      });
+    }
+    say("#say3", ""); show();
+  }
+
+  /* ---------- game 4: nouns and verbs ---------- */
+  const WORDS = [["kite","n"],["river","n"],["Ayesha","n"],["mango","n"],["bus","n"],["pencil","n"],
+                 ["jump","v"],["running","v"],["cooked","v"],["read","v"],["climbing","v"],["washed","v"]];
+  const TWO = [
+    {ask:"In which sentence is <b>paint</b> a doing word?", s:["I paint the gate green.", "The paint is still wet."], a:0, why:"Yes. “I paint” is something you do."},
+    {ask:"In which sentence is <b>ring</b> a naming word?", s:["Please ring the bell.", "Her ring is made of gold."], a:1, why:"Yes. Here the ring is a thing."}
+  ];
+  function init4(){
+    const list = shuffle(WORDS); let n = 0, partA = false, twoDone = 0;
+    const finish = () => { if (partA && twoDone === TWO.length) award(3); };
+    $("#chipsN").innerHTML = ""; $("#chipsV").innerHTML = ""; say("#say4", ""); say("#say4b", "");
+    function show(){
+      $("#q4count").textContent = n < list.length ? "Word " + (n + 1) + " of " + list.length : "All words sorted";
+      $("#bigword").textContent = n < list.length ? list[n][0] : "Done!";
+    }
+    function pick(kind, btn){
+      if (n >= list.length) return;
+      const [w, k] = list[n];
+      if (k !== kind) return wrong("#say4", k === "v" ? "Can you do it? Then it is a doing word." : "Is it a person, a place or a thing? Then it is a naming word.", btn);
+      $(kind === "n" ? "#chipsN" : "#chipsV").appendChild(h("span", {class:"chip"}, w));
+      n++; show();
+      if (n === list.length) { partA = true; right("#say4", "Every word is in the right box."); finish(); }
+      else right("#say4", "“" + w + "” is a " + (k === "n" ? "noun." : "verb."));
+    }
+    $("#binN").onclick = e => pick("n", e.currentTarget);
+    $("#binV").onclick = e => pick("v", e.currentTarget);
+    const box = $("#twoJobs"); box.innerHTML = "";
+    TWO.forEach(t => {
+      const wrap = h("div", {class:"tq"}, '<p class="do">' + t.ask + "</p>");
+      t.s.forEach((s, i) => {
+        const b = h("button", {class:"opt"}, s);
+        b.addEventListener("click", () => {
+          if (i !== t.a) return wrong("#say4b", "Read both sentences once more.", b);
+          b.classList.add("right"); wrap.querySelectorAll("button").forEach(x => x.disabled = true);
+          twoDone++; right("#say4b", t.why + (partA && twoDone === TWO.length ? " You win a star!" : "")); finish();
+        });
+        wrap.appendChild(b);
+      });
+      box.appendChild(wrap);
+    });
+    show();
+  }
+
+  /* ---------- game 5: opposites ---------- */
+  const PAIRS = [["big","small"],["hot","cold"],["wet","dry"],["early","late"],["open","shut"],["happy","sad"]];
+  function init5(){
+    const box = $("#match"); box.innerHTML = ""; say("#say5", "");
+    const rightSide = shuffle(PAIRS.map((p, i) => i));
+    let sel = null, done = 0;
+    const btns = [];
+    function tap(side, id, b){
+      if (b.classList.contains("paired")) return;
+      if (!sel || sel.side === side) { if (sel) sel.b.setAttribute("aria-pressed", "false"); sel = {side, id, b}; b.setAttribute("aria-pressed", "true"); return; }
+      const other = sel; sel = null; other.b.setAttribute("aria-pressed", "false");
+      if (other.id !== id) { shake(other.b); return wrong("#say5", "Those two are not opposites. Try again.", b); }
+      [b, other.b].forEach(x => x.classList.add("paired", "p" + id, "pop"));
+      done++;
+      if (done === PAIRS.length) { right("#say5", "Six pairs of opposites. You win a star!"); award(4); }
+      else right("#say5", PAIRS[id][0] + " and " + PAIRS[id][1] + " are opposites.");
+    }
+    PAIRS.forEach((p, i) => {
+      const l = h("button", {class:"m", "aria-pressed":"false"}, p[0]);
+      const r = h("button", {class:"m", "aria-pressed":"false"}, PAIRS[rightSide[i]][1]);
+      l.addEventListener("click", () => tap("l", i, l));
+      r.addEventListener("click", () => tap("r", rightSide[i], r));
+      box.append(l, r); btns.push(l, r);
+    });
+  }
+
+  /* ---------- game 6: questions with "or" ---------- */
+  const INK = 'stroke="#1B2340" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+  const PICS = {
+    soup: '<path d="M52 66h96a48 44 0 0 1-96 0z" fill="#F58A1F" ' + INK + '/><ellipse cx="100" cy="66" rx="50" ry="9" fill="#FFD233" ' + INK + '/>' +
+          '<path d="M80 50q-9-9 0-18t0-18M100 50q-9-9 0-18t0-18M120 50q-9-9 0-18t0-18" fill="none" stroke="#9AA0A8" stroke-width="4" stroke-linecap="round"/>' +
+          '<path d="M20 112h160" fill="none" ' + INK + '/>',
+    door: '<rect x="62" y="10" width="76" height="106" fill="#EADFCB" ' + INK + '/><rect x="70" y="18" width="60" height="98" fill="#8A5A32" ' + INK + '/>' +
+          '<rect x="79" y="28" width="42" height="30" fill="#A9743F" ' + INK + '/><rect x="79" y="70" width="42" height="34" fill="#A9743F" ' + INK + '/>' +
+          '<circle cx="122" cy="64" r="4" fill="#FFD233" ' + INK + '/><path d="M20 116h160" fill="none" ' + INK + '/>',
+    socks:'<path d="M14 22h172" fill="none" ' + INK + '/>' +
+          '<path d="M56 22h22v40l22 10a10 10 0 0 1-6 16l-34-6a6 6 0 0 1-4-6z" fill="#F58FBF" ' + INK + '/>' +
+          '<path d="M112 22h22v40l22 10a10 10 0 0 1-6 16l-34-6a6 6 0 0 1-4-6z" fill="#8FD0F5" ' + INK + '/>' +
+          '<path d="M70 96q-5 8 0 11q5-3 0-11zM92 100q-5 8 0 11q5-3 0-11zM126 96q-5 8 0 11q5-3 0-11zM148 100q-5 8 0 11q5-3 0-11z" fill="#2F7FE0"/>' +
+          '<ellipse cx="100" cy="120" rx="52" ry="5" fill="#8FD0F5"/>',
+    elephant:'<path d="M16 118h170" fill="none" ' + INK + '/><rect x="84" y="88" width="18" height="30" fill="#9AA0A8" ' + INK + '/><rect x="134" y="88" width="18" height="30" fill="#9AA0A8" ' + INK + '/>' +
+          '<ellipse cx="116" cy="64" rx="52" ry="36" fill="#9AA0A8" ' + INK + '/><circle cx="62" cy="52" r="28" fill="#9AA0A8" ' + INK + '/>' +
+          '<path d="M42 66q-14 22-2 44" fill="none" stroke="#1B2340" stroke-width="15" stroke-linecap="round"/><path d="M42 66q-14 22-2 44" fill="none" stroke="#9AA0A8" stroke-width="9" stroke-linecap="round"/>' +
+          '<ellipse cx="78" cy="50" rx="13" ry="20" fill="#7E858E" ' + INK + '/><circle cx="52" cy="46" r="3.500" fill="#1B2340"/>' +
+          '<path d="M168 60q10 8 6 20" fill="none" ' + INK + '/><circle cx="186" cy="110" r="5" fill="#E23B3B" ' + INK + '/><path d="M186 115v3" ' + INK + '/>'
+  };
+  const SCENES = [
+    {pic:"soup", w:["Is","the","soup","hot","or","cold"], ans:["The soup is cold.", "The soup is hot."], a:1},
+    {pic:"door", w:["Is","the","door","open","or","shut"], ans:["The door is open.", "The door is shut."], a:1},
+    {pic:"socks", w:["Are","the","socks","wet","or","dry"], ans:["The socks are wet.", "The socks are dry."], a:0},
+    {pic:"elephant", w:["Is","the","elephant","big","or","small"], ans:["The elephant is small.", "The elephant is big."], a:1}
+  ];
+  function init6(){
+    let n = 0; say("#say6", "");
+    function show(){
+      const sc = SCENES[n], seq = sc.w.slice(); let pos = 0;
+      $("#q6count").textContent = "Picture " + (n + 1) + " of " + SCENES.length;
+      $("#pic").innerHTML = '<svg viewBox="0 0 200 130" role="img" aria-label="Picture of the ' + sc.w[2] + '">' + PICS[sc.pic] + "</svg>";
+      const line = $("#line"), bank = $("#bank"), answers = $("#answers");
+      line.innerHTML = '<span class="ph">Your question will appear here.</span>'; bank.innerHTML = ""; answers.innerHTML = "";
+      shuffle(seq.map((w, i) => i)).forEach(i => {
+        const word = sc.w[i], b = h("button", {class:"wordbtn"}, word);
+        b.addEventListener("click", () => {
+          // "hot or cold" and "cold or hot" are both good questions, so allow either describing word first
+          if (pos === 3 && word === seq[5]) { const t = seq[3]; seq[3] = seq[5]; seq[5] = t; }
+          if (word !== seq[pos]) return wrong("#say6", pos === 0 ? "A question starts with Is or Are." : "Not that word yet. Which word comes next?", b);
+          if (pos === 0) line.innerHTML = "";
+          pos++; b.classList.add("used"); b.disabled = true;
+          line.appendChild(h("span", null, word + (pos === seq.length ? "?" : "")));
+          if (pos < seq.length) return say("#say6", "");
+          right("#say6", "Good question! Now look at the picture and answer it.");
+          sc.ans.forEach((txt, i) => {
+            const ab = h("button", {class:"opt"}, txt);
+            ab.addEventListener("click", () => {
+              if (i !== sc.a) return wrong("#say6", "Look at the picture again.", ab);
+              ab.classList.add("right"); answers.querySelectorAll("button").forEach(x => x.disabled = true);
+              n++;
+              if (n === SCENES.length) { right("#say6", "You can ask and answer “or” questions. You win a star!"); award(5); }
+              else { right("#say6", "That is true!"); setTimeout(show, 1200); }
+            });
+            answers.appendChild(ab);
+          });
+        });
+        bank.appendChild(b);
+      });
+    }
+    show();
+  }
+
+  /* ---------- top bar toggles ---------- */
+  function setUrdu(on){
+    document.querySelectorAll(".ur").forEach(e => e.hidden = !on);
+    $("#urduBtn").setAttribute("aria-pressed", on ? "true" : "false");
+    try { localStorage.setItem("cbe-urdu", on ? "1" : "0"); } catch (e) {}
+  }
+  $("#urduBtn").addEventListener("click", () => setUrdu($("#urduBtn").getAttribute("aria-pressed") !== "true"));
+  $("#soundBtn").addEventListener("click", e => {
+    soundOn = !soundOn; e.currentTarget.setAttribute("aria-pressed", soundOn ? "true" : "false");
+    e.currentTarget.textContent = soundOn ? "Sound on" : "Sound off";
+  });
+
+  function start(){ stars = [false, false, false, false, false, false]; drawStars(); init1(); init2(); init3(); init4(); init5(); init6(); }
+  $("#again").addEventListener("click", () => { start(); window.scrollTo({top:0}); });
+  let urdu = false; try { urdu = localStorage.getItem("cbe-urdu") === "1"; } catch (e) {}
+  start(); setUrdu(urdu);
+})();
+</script>
+</body>
+</html>
